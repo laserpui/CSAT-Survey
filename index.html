@@ -19,13 +19,10 @@
     <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
         <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                
-                <!-- โลโก้บริษัทจาก Postimg (Direct Link) -->
                 <img src="https://i.postimg.cc/RZDLWPcX/Laser-Engineer-Logo-PNG-01.png" 
                      alt="Service Man Logo" 
                      class="h-10 w-auto object-contain"
                      onerror="this.onerror=null; this.src='https://placehold.co/120x40/2563eb/white?text=Service+Man';">
-                
             </div>
             <button id="toggleAdminBtn" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 px-3 py-1.5 rounded-full">
                 ดูผลประเมิน (Admin)
@@ -117,11 +114,11 @@
                 <h3 id="avgQ1" class="text-2xl font-bold text-slate-800 mt-1">—</h3>
             </div>
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <p class="text-sm text-slate-500 font-medium">ความเป็นมืออาชีพ (2)</p>
+                <p class="text-sm text-slate-500 font-medium">บุคลิกภาพและการวางตัว (2)</p>
                 <h3 id="avgQ2" class="text-2xl font-bold text-slate-800 mt-1">—</h3>
             </div>
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <p class="text-sm text-slate-500 font-medium">ความเชี่ยวชาญ (3)</p>
+                <p class="text-sm text-slate-500 font-medium">วิเคราะห์และแก้ไขปัญหา (3)</p>
                 <h3 id="avgQ3" class="text-2xl font-bold text-slate-800 mt-1">—</h3>
             </div>
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
@@ -139,8 +136,8 @@
                             <th class="p-4 py-3">วันที่ / เวลา</th>
                             <th class="p-4 py-3">เลขที่งาน</th>
                             <th class="p-4 py-3 text-center">เวลา (1)</th>
-                            <th class="p-4 py-3 text-center">มารยาท (2)</th>
-                            <th class="p-4 py-3 text-center">เชี่ยวชาญ (3)</th>
+                            <th class="p-4 py-3 text-center">บุคลิกภาพ (2)</th>
+                            <th class="p-4 py-3 text-center">วิเคราะห์ปัญหา (3)</th>
                             <th class="p-4 py-3 text-center">ภาพรวม (4)</th>
                             <th class="p-4 py-3">ข้อเสนอแนะ</th>
                         </tr>
@@ -193,12 +190,12 @@
 
     <script>
         // ==========================================
-        // 🔐 ตั้งค่ารหัสผ่าน Admin ที่นี่
+        // ตั้งค่ารหัสผ่าน Admin
         // ==========================================
         const ADMIN_PASSWORD = 'Admin1234';
 
         // ==========================================
-        // ตั้งค่า Google Sheet URL (ถ้ามี)
+        // ตั้งค่า Google Sheet URL
         // ==========================================
         const GOOGLE_SHEET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKOzf_dYEr8HOnEmFmSuVZFRGVdG37FlHtIwy-UWFUC5nxB4xRMojMeoStSSTSrrW23Q/exec';
 
@@ -207,8 +204,8 @@
         // ==========================================
         const questions = [
             { id: 'q1', text: 'ความตรงต่อเวลาและการนัดหมาย', sub: 'วิศวกรมาถึงตรงเวลาตามที่นัดหมายหรือไม่?' },
-            { id: 'q2', text: 'ความเป็นมืออาชีพและมารยาท', sub: 'วิศวกรมีมารยาท สุภาพ และแต่งกายเรียบร้อยหรือไม่?' },
-            { id: 'q3', text: 'ความเชี่ยวชาญและทักษะการแก้ไขปัญหา', sub: 'วิศวกรสามารถแก้ไขปัญหาได้อย่างถูกต้องและมีประสิทธิภาพหรือไม่?' },
+            { id: 'q2', text: 'บุคลิกภาพและการวางตัว', sub: 'วิศวกรมีบุคลิกภาพที่ดี วางตัวเหมาะสม และแต่งกายเรียบร้อยหรือไม่?' },
+            { id: 'q3', text: 'การวิเคราะห์และแก้ไขปัญหาที่ตรงจุด', sub: 'วิศวกรสามารถวิเคราะห์และแก้ไขปัญหาได้อย่างถูกต้องตรงจุดหรือไม่?' },
             { id: 'q4', text: 'ภาพรวมความพึงพอใจในการบริการครั้งนี้', sub: 'โดยรวมท่านพึงพอใจกับการบริการในครั้งนี้เพียงใด?' },
         ];
 
@@ -257,7 +254,6 @@
                 container.appendChild(div);
             });
 
-            // Bind star click events
             document.querySelectorAll('.star-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const qid = btn.dataset.qid;
@@ -316,8 +312,6 @@
                 };
 
                 if (GOOGLE_SHEET_SCRIPT_URL) {
-                    // ใช้ no-cors เพราะ Google Apps Script ไม่ส่ง CORS header กลับ
-                    // ทำให้ browser อ่าน response ไม่ได้ แต่ข้อมูลส่งถึง Sheet แน่นอน
                     await fetch(GOOGLE_SHEET_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -342,14 +336,12 @@
         });
 
         // ==========================================
-        // 🔐 Admin access — ปุ่มเดียว, logic เดียว
+        // Admin access
         // ==========================================
         toggleAdminBtn.addEventListener('click', () => {
             if (isAdminView) {
-                // ออกจากหน้า Admin ได้เลย ไม่ต้องใส่รหัส
                 switchView(false);
             } else {
-                // ต้องใส่รหัสก่อนเข้า
                 openPasswordModal();
             }
         });
@@ -401,9 +393,9 @@
         }
 
         // ==========================================
-        // Admin dashboard — ดึงข้อมูลจาก Google Sheet
+        // Admin dashboard
         // ==========================================
-        let allSheetData = []; // เก็บข้อมูลดิบทั้งหมดจาก Sheet
+        let allSheetData = [];
 
         async function fetchAdminData() {
             const loadingEl = document.getElementById('loadingData');
@@ -411,7 +403,6 @@
             const tbody = document.getElementById('tableBody');
             const statusEl = document.getElementById('sheetStatus');
 
-            // แสดง loading
             loadingEl.classList.remove('hidden');
             noDataEl.classList.add('hidden');
             tbody.innerHTML = '';
@@ -419,7 +410,6 @@
             statusEl.className = 'bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2';
 
             try {
-                // ดึงข้อมูลจาก Google Apps Script (doGet)
                 const url = GOOGLE_SHEET_SCRIPT_URL + '?action=get&t=' + Date.now();
                 const res = await fetch(url);
                 const json = await res.json();
@@ -433,7 +423,6 @@
                 }
             } catch (err) {
                 console.warn('Sheet fetch failed, fallback to localStorage:', err);
-                // Fallback ใช้ LocalStorage ถ้าดึง Sheet ไม่ได้
                 allSheetData = JSON.parse(localStorage.getItem('med_csat_data') || '[]');
                 statusEl.innerHTML = `⚠️ ใช้ข้อมูลแคช`;
                 statusEl.className = 'bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2';
@@ -444,7 +433,7 @@
         }
 
         // ==========================================
-        // กรองและแสดงตาราง
+        // Filter & render table
         // ==========================================
         function applyFilter() {
             const fromVal = document.getElementById('filterFrom').value;
@@ -485,14 +474,10 @@
         }
 
         function parseItemDate(item) {
-            // รองรับทั้ง timestamp (number) และ dateStr (string)
             if (item.timestamp) return new Date(item.timestamp);
             if (item.dateStr) {
-                // ลองแปลงด้วย new Date() โดยตรง (รองรับ Fri May 22 2026...)
                 const d = new Date(item.dateStr);
                 if (!isNaN(d.getTime())) return d;
-                
-                // สำหรับรูปแบบ "22/05/2025 11:13:00" → parse manual
                 const parts = item.dateStr.replace(' ', '/').replace(/:/g, '/').split('/');
                 if (parts.length >= 3) {
                     return new Date(parts[2], parts[1] - 1, parts[0], parts[3] || 0, parts[4] || 0, parts[5] || 0);
@@ -518,8 +503,6 @@
             }
 
             noDataEl.classList.add('hidden');
-
-            // เรียงใหม่ล่าสุดขึ้นก่อน
             const sorted = [...data].sort((a, b) => parseItemDate(b) - parseItemDate(a));
             tbody.innerHTML = '';
 
@@ -532,7 +515,6 @@
                 const isLow = itemTotal <= 3;
                 const rowClass = isLow ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-slate-50';
 
-                // แสดงวันที่ — เป็นตัวเลข วัน/เดือน/ปี
                 let dateDisplay = '—';
                 const d = parseItemDate(item);
                 if (d.getTime() !== 0) {
@@ -550,7 +532,7 @@
                         <td class="p-4 py-3 text-center ${q1 <= 3 && q1 > 0 ? 'text-red-500 font-bold' : ''}">${q1 || '-'}</td>
                         <td class="p-4 py-3 text-center ${q2 <= 3 && q2 > 0 ? 'text-red-500 font-bold' : ''}">${q2 || '-'}</td>
                         <td class="p-4 py-3 text-center ${q3 <= 3 && q3 > 0 ? 'text-red-500 font-bold' : ''}">${q3 || '-'}</td>
-                        <td class="p-4 py-3 text-center font-semibold ${isLow ? 'text-red-600' : 'text-slate-700'}">${itemTotal.toFixed(1)}</td>
+                        <td class="p-4 py-3 text-center font-semibold ${q4 <= 3 && q4 > 0 ? 'text-red-600' : 'text-slate-700'}">${q4 || '-'}</td>
                         <td class="p-4 py-3 text-slate-500 max-w-xs truncate" title="${escapeHtml(item.comments || '')}">${escapeHtml(item.comments || '') || '-'}</td>
                     </tr>
                 `;
