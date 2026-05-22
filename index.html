@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSAT Survey - Premium Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; }
+        .star-active path { fill: #fbbf24; }
+        .star-inactive path { fill: #e2e8f0; }
+        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col relative">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-md">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900 leading-tight">Laser Man</h1>
+                    <p class="text-xs text-slate-500">Premium After-Sales Support</p>
+                </div>
+            </div>
+            <button id="toggleAdminBtn" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 px-3 py-1.5 rounded-full">
+                ดูผลประเมิน (Admin)
+            </button>
+        </div>
+    </header>
+
+    <!-- Survey Section -->
+    <main id="surveySection" class="flex-grow w-full max-w-3xl mx-auto p-4 sm:p-6 pb-24 transition-all opacity-100">
+        <div class="bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-10 text-center text-white">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">แบบประเมินความพึงพอใจ</h2>
+                <p class="text-blue-100 text-sm md:text-base opacity-90 font-light">โปรดสละเวลา 1 นาที เพื่อประเมินการทำงานของทีมวิศวกรบริการในวันนี้ เพื่อนำไปพัฒนาการบริการให้ดียิ่งขึ้นครับ</p>
+            </div>
+            <div class="p-6 md:p-10">
+                <div class="mb-8">
+                    <label class="block text-sm md:text-base font-bold text-slate-800 mb-2">เลขที่งาน (Job No.) <span class="text-red-500">*</span></label>
+                    <input type="text" id="jobNumber" class="w-full px-4 py-3.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow outline-none text-slate-700 text-sm md:text-base" placeholder="ระบุเลขที่งานหรือหมายเลขอ้างอิง">
+                </div>
+                
+                <hr class="border-slate-100 mb-8">
+                
+                <div id="questionsContainer" class="space-y-6"></div>
+                
+                <div class="mt-8 pt-6 border-t border-slate-100">
+                    <label class="block text-sm md:text-base font-bold text-slate-800 mb-2">ข้อเสนอแนะเพิ่มเติมเพื่อการปรับปรุง (ถ้ามี)</label>
+                    <textarea id="comments" rows="3" class="w-full px-4 py-3.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow outline-none text-slate-700 resize-none text-sm md:text-base" placeholder="พิมพ์ข้อเสนอแนะของท่านที่นี่..."></textarea>
+                </div>
+                
+                <div class="mt-8">
+                    <button id="submitBtn" disabled class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-lg transition-colors shadow-md text-base md:text-lg">
+                        ส่งผลประเมิน
+                    </button>
+                    <p id="errorMsg" class="text-red-500 text-sm mt-3 hidden text-center">กรุณากรอกเลขที่งานและให้คะแนนทุกหัวข้อก่อนส่ง</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Admin Dashboard -->
+    <main id="adminSection" class="hidden flex-grow w-full max-w-6xl mx-auto p-4 sm:p-6">
+        <div class="flex justify-between items-end mb-6 flex-wrap gap-3">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">ระบบหลังบ้าน (Dashboard)</h2>
+                <p class="text-slate-500">ดึงข้อมูลจาก Google Sheet แบบ Real-time</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="sheetStatus" class="bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                    กำลังโหลด...
+                </div>
+                <button onclick="fetchAdminData()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    รีเฟรช
+                </button>
+            </div>
+        </div>
+
+        <!-- Date Filter -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-5 flex flex-wrap items-end gap-4">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span class="text-sm font-semibold text-slate-700">กรองช่วงวันที่</span>
+            </div>
+            <div class="flex flex-wrap items-end gap-3 flex-1">
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">ตั้งแต่วันที่</label>
+                    <input type="date" id="filterFrom" class="px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">ถึงวันที่</label>
+                    <input type="date" id="filterTo" class="px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
+                </div>
+                <button onclick="applyFilter()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">กรองข้อมูล</button>
+                <button onclick="clearFilter()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors">ล้างตัวกรอง</button>
+                <span id="filterBadge" class="hidden text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-medium"></span>
+            </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 col-span-2 md:col-span-1">
+                <p class="text-sm text-slate-500 font-medium">คะแนนเฉลี่ยรวม (CSAT)</p>
+                <h3 id="avgTotal" class="text-3xl font-bold text-blue-600 mt-1">—</h3>
+                <p id="totalCount" class="text-xs text-slate-400 mt-1">0 รายการ</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-sm text-slate-500 font-medium">ความตรงต่อเวลา</p>
+                <h3 id="avgQ1" class="text-2xl font-bold text-slate-800 mt-1">—</h3>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-sm text-slate-500 font-medium">ความเป็นมืออาชีพ</p>
+                <h3 id="avgQ2" class="text-2xl font-bold text-slate-800 mt-1">—</h3>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-sm text-slate-500 font-medium">ความเชี่ยวชาญ</p>
+                <h3 id="avgQ3" class="text-2xl font-bold text-slate-800 mt-1">—</h3>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-sm font-medium text-slate-600">
+                            <th class="p-4 py-3">วันที่ / เวลา</th>
+                            <th class="p-4 py-3">เลขที่งาน</th>
+                            <th class="p-4 py-3 text-center">เวลา (1)</th>
+                            <th class="p-4 py-3 text-center">มารยาท (2)</th>
+                            <th class="p-4 py-3 text-center">เชี่ยวชาญ (3)</th>
+                            <th class="p-4 py-3 text-center">ภาพรวม (4)</th>
+                            <th class="p-4 py-3">ข้อเสนอแนะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="text-sm text-slate-700 divide-y divide-slate-100"></tbody>
+                </table>
+                <div id="loadingData" class="p-10 text-center text-slate-400">
+                    <svg class="w-8 h-8 animate-spin mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                    กำลังโหลดข้อมูลจาก Google Sheet...
+                </div>
+                <div id="noData" class="p-10 text-center text-slate-400 hidden">ไม่พบข้อมูลในช่วงที่เลือก</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
+            <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-1">เข้าสู่ระบบ Admin</h3>
+            <p class="text-slate-500 text-sm mb-5">เฉพาะผู้ดูแลระบบเท่านั้น</p>
+            <input type="password" id="adminPassword" placeholder="ระบุรหัสผ่าน" 
+                   class="w-full px-4 py-3 rounded-xl border border-slate-300 mb-4 focus:ring-2 focus:ring-blue-500 outline-none text-center tracking-widest text-lg"
+                   onkeydown="if(event.key==='Enter') verifyPassword()">
+            <div class="flex gap-2">
+                <button onclick="closePasswordModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-medium transition-colors">ยกเลิก</button>
+                <button onclick="verifyPassword()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-colors">ยืนยัน</button>
+            </div>
+            <p id="passwordError" class="text-red-500 text-sm mt-3 hidden">❌ รหัสผ่านไม่ถูกต้อง</p>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-95 opacity-0 transition-all duration-300" id="successModalContent">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">ขอบคุณครับ!</h3>
+            <p class="text-slate-500 mb-6">ระบบได้รับผลประเมินของท่านเรียบร้อยแล้ว ข้อมูลนี้จะช่วยให้เราพัฒนาบริการให้ดียิ่งขึ้น</p>
+            <button id="closeModalBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-3 rounded-xl transition-colors">
+                กลับสู่หน้าแรก
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 🔐 ตั้งค่ารหัสผ่าน Admin ที่นี่
+        // ==========================================
+        const ADMIN_PASSWORD = 'Admin1234';
+
+        // ==========================================
+        // ตั้งค่า Google Sheet URL (ถ้ามี)
+        // ==========================================
+        const GOOGLE_SHEET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKOzf_dYEr8HOnEmFmSuVZFRGVdG37FlHtIwy-UWFUC5nxB4xRMojMeoStSSTSrrW23Q/exec';
+
+        // ==========================================
+        // คำถามในแบบสอบถาม
+        // ==========================================
+        const questions = [
+            { id: 'q1', text: 'ความตรงต่อเวลาและการนัดหมาย', sub: 'วิศวกรมาถึงตรงเวลาตามที่นัดหมายหรือไม่?' },
+            { id: 'q2', text: 'ความเป็นมืออาชีพและมารยาท', sub: 'วิศวกรมีมารยาท สุภาพ และแต่งกายเรียบร้อยหรือไม่?' },
+            { id: 'q3', text: 'ความเชี่ยวชาญและทักษะการแก้ไขปัญหา', sub: 'วิศวกรสามารถแก้ไขปัญหาได้อย่างถูกต้องและมีประสิทธิภาพหรือไม่?' },
+            { id: 'q4', text: 'ภาพรวมความพึงพอใจในการบริการครั้งนี้', sub: 'โดยรวมท่านพึงพอใจกับการบริการในครั้งนี้เพียงใด?' },
+        ];
+
+        // State
+        let isAdminView = false;
+        let surveyState = { q1: 0, q2: 0, q3: 0, q4: 0 };
+
+        // DOM references
+        const surveySection = document.getElementById('surveySection');
+        const adminSection = document.getElementById('adminSection');
+        const toggleAdminBtn = document.getElementById('toggleAdminBtn');
+        const jobNumberInput = document.getElementById('jobNumber');
+        const commentsInput = document.getElementById('comments');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // ==========================================
+        // Render star rating questions
+        // ==========================================
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            questions.forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = 'pb-6 border-b border-slate-100 last:border-0 last:pb-0';
+                div.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm md:text-base font-bold text-slate-800">${idx + 1}. ${q.text} <span class="text-red-500">*</span></p>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">${q.sub}</p>
+                        </div>
+                        <div class="flex gap-1.5 md:gap-2 justify-start md:justify-end" id="stars-${q.id}">
+                            ${[1,2,3,4,5].map(val => `
+                                <button class="star-btn w-9 h-9 sm:w-12 sm:h-12 rounded-full hover:scale-110 transition-transform focus:outline-none flex items-center justify-center" 
+                                        data-qid="${q.id}" data-val="${val}" aria-label="${val} ดาว">
+                                    <svg class="w-8 h-8 sm:w-10 sm:h-10 mx-auto" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" 
+                                              class="${surveyState[q.id] >= val ? 'fill-yellow-400' : 'fill-slate-200'}" 
+                                              stroke="none"/>
+                                    </svg>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            // Bind star click events
+            document.querySelectorAll('.star-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const qid = btn.dataset.qid;
+                    const val = parseInt(btn.dataset.val);
+                    surveyState[qid] = val;
+                    updateStarUI(qid, val);
+                    validateForm();
+                });
+            });
+        }
+
+        function updateStarUI(qid, val) {
+            const container = document.getElementById(`stars-${qid}`);
+            if (!container) return;
+            container.querySelectorAll('.star-btn').forEach(btn => {
+                const bval = parseInt(btn.dataset.val);
+                const path = btn.querySelector('path');
+                path.className.baseVal = bval <= val ? 'fill-yellow-400' : 'fill-slate-200';
+            });
+        }
+
+        // ==========================================
+        // Form validation
+        // ==========================================
+        function validateForm() {
+            const hasJobNumber = jobNumberInput.value.trim() !== '';
+            const hasAllRatings = Object.values(surveyState).every(v => v > 0);
+            submitBtn.disabled = !(hasJobNumber && hasAllRatings);
+            if (hasJobNumber && hasAllRatings) errorMsg.classList.add('hidden');
+        }
+
+        jobNumberInput.addEventListener('input', validateForm);
+
+        // ==========================================
+        // Submit
+        // ==========================================
+        submitBtn.addEventListener('click', async () => {
+            if (!validateForm() && submitBtn.disabled) {
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            const originalHTML = submitBtn.innerHTML;
+            submitBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังส่งข้อมูล...`;
+
+            try {
+                const payload = {
+                    jobNumber: jobNumberInput.value.trim(),
+                    q1: surveyState.q1,
+                    q2: surveyState.q2,
+                    q3: surveyState.q3,
+                    q4: surveyState.q4,
+                    comments: commentsInput.value.trim(),
+                    timestamp: new Date().getTime()
+                };
+
+                if (GOOGLE_SHEET_SCRIPT_URL) {
+                    // ใช้ no-cors เพราะ Google Apps Script ไม่ส่ง CORS header กลับ
+                    // ทำให้ browser อ่าน response ไม่ได้ แต่ข้อมูลส่งถึง Sheet แน่นอน
+                    await fetch(GOOGLE_SHEET_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify(payload),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    });
+                }
+
+                let localData = JSON.parse(localStorage.getItem('med_csat_data') || '[]');
+                localData.push(payload);
+                localStorage.setItem('med_csat_data', JSON.stringify(localData));
+
+                showSuccessModal();
+                resetForm();
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+            } finally {
+                submitBtn.innerHTML = originalHTML;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // ==========================================
+        // 🔐 Admin access — ปุ่มเดียว, logic เดียว
+        // ==========================================
+        toggleAdminBtn.addEventListener('click', () => {
+            if (isAdminView) {
+                // ออกจากหน้า Admin ได้เลย ไม่ต้องใส่รหัส
+                switchView(false);
+            } else {
+                // ต้องใส่รหัสก่อนเข้า
+                openPasswordModal();
+            }
+        });
+
+        function openPasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('passwordError').classList.add('hidden');
+            setTimeout(() => document.getElementById('adminPassword').focus(), 100);
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('passwordError').classList.add('hidden');
+        }
+
+        function verifyPassword() {
+            const input = document.getElementById('adminPassword');
+            const errorEl = document.getElementById('passwordError');
+            if (input.value === ADMIN_PASSWORD) {
+                closePasswordModal();
+                switchView(true);
+            } else {
+                errorEl.classList.remove('hidden');
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function switchView(toAdmin) {
+            isAdminView = toAdmin;
+            if (toAdmin) {
+                surveySection.classList.add('hidden');
+                adminSection.classList.remove('hidden');
+                toggleAdminBtn.innerText = 'ออกจากหน้า Admin';
+                toggleAdminBtn.className = 'text-sm font-medium text-white transition-colors bg-slate-800 hover:bg-slate-900 px-3 py-1.5 rounded-full';
+                fetchAdminData();
+            } else {
+                surveySection.classList.remove('hidden');
+                adminSection.classList.add('hidden');
+                toggleAdminBtn.innerText = 'ดูผลประเมิน (Admin)';
+                toggleAdminBtn.className = 'text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors bg-blue-50 px-3 py-1.5 rounded-full';
+            }
+        }
+
+        // ==========================================
+        // Admin dashboard — ดึงข้อมูลจาก Google Sheet
+        // ==========================================
+        let allSheetData = []; // เก็บข้อมูลดิบทั้งหมดจาก Sheet
+
+        async function fetchAdminData() {
+            const loadingEl = document.getElementById('loadingData');
+            const noDataEl = document.getElementById('noData');
+            const tbody = document.getElementById('tableBody');
+            const statusEl = document.getElementById('sheetStatus');
+
+            // แสดง loading
+            loadingEl.classList.remove('hidden');
+            noDataEl.classList.add('hidden');
+            tbody.innerHTML = '';
+            statusEl.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> กำลังโหลด...`;
+            statusEl.className = 'bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2';
+
+            try {
+                // ดึงข้อมูลจาก Google Apps Script (doGet)
+                const url = GOOGLE_SHEET_SCRIPT_URL + '?action=get&t=' + Date.now();
+                const res = await fetch(url);
+                const json = await res.json();
+
+                if (json.result === 'success' && Array.isArray(json.data)) {
+                    allSheetData = json.data;
+                    statusEl.innerHTML = `<span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span></span> เชื่อมต่อแล้ว`;
+                    statusEl.className = 'bg-green-100 text-green-800 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2';
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (err) {
+                console.warn('Sheet fetch failed, fallback to localStorage:', err);
+                // Fallback ใช้ LocalStorage ถ้าดึง Sheet ไม่ได้
+                allSheetData = JSON.parse(localStorage.getItem('med_csat_data') || '[]');
+                statusEl.innerHTML = `⚠️ ใช้ข้อมูลแคช`;
+                statusEl.className = 'bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2';
+            }
+
+            loadingEl.classList.add('hidden');
+            renderTable(allSheetData);
+        }
+
+        // ==========================================
+        // กรองและแสดงตาราง
+        // ==========================================
+        function applyFilter() {
+            const fromVal = document.getElementById('filterFrom').value;
+            const toVal = document.getElementById('filterTo').value;
+            const badge = document.getElementById('filterBadge');
+
+            let filtered = [...allSheetData];
+
+            if (fromVal) {
+                const from = new Date(fromVal);
+                from.setHours(0, 0, 0, 0);
+                filtered = filtered.filter(item => parseItemDate(item) >= from);
+            }
+            if (toVal) {
+                const to = new Date(toVal);
+                to.setHours(23, 59, 59, 999);
+                filtered = filtered.filter(item => parseItemDate(item) <= to);
+            }
+
+            if (fromVal || toVal) {
+                const parts = [];
+                if (fromVal) parts.push(formatDateThai(fromVal));
+                if (toVal) parts.push(formatDateThai(toVal));
+                badge.textContent = parts.join(' — ');
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            renderTable(filtered);
+        }
+
+        function clearFilter() {
+            document.getElementById('filterFrom').value = '';
+            document.getElementById('filterTo').value = '';
+            document.getElementById('filterBadge').classList.add('hidden');
+            renderTable(allSheetData);
+        }
+
+        function parseItemDate(item) {
+            // รองรับทั้ง timestamp (number) และ dateStr (string dd/MM/yyyy HH:mm:ss)
+            if (item.timestamp) return new Date(item.timestamp);
+            if (item.dateStr) {
+                // "22/05/2025 11:13:00" → parse manual
+                const [d, m, y, h, min, s] = item.dateStr.replace(' ', '/').replace(/:/g, '/').split('/');
+                return new Date(y, m - 1, d, h, min, s);
+            }
+            return new Date(0);
+        }
+
+        function formatDateThai(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('th-TH', { dateStyle: 'medium' });
+        }
+
+        function renderTable(data) {
+            const noDataEl = document.getElementById('noData');
+            const tbody = document.getElementById('tableBody');
+
+            if (!data || data.length === 0) {
+                noDataEl.classList.remove('hidden');
+                tbody.innerHTML = '';
+                updateMetrics([]);
+                return;
+            }
+
+            noDataEl.classList.add('hidden');
+
+            // เรียงใหม่ล่าสุดขึ้นก่อน
+            const sorted = [...data].sort((a, b) => parseItemDate(b) - parseItemDate(a));
+            tbody.innerHTML = '';
+
+            sorted.forEach(item => {
+                const q1 = Number(item.q1) || 0;
+                const q2 = Number(item.q2) || 0;
+                const q3 = Number(item.q3) || 0;
+                const q4 = Number(item.q4) || 0;
+                const itemTotal = (q1 + q2 + q3 + q4) / 4;
+                const isLow = itemTotal <= 3;
+                const rowClass = isLow ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-slate-50';
+
+                // แสดงวันที่ — รองรับทั้ง timestamp และ dateStr จาก Sheet
+                let dateDisplay = '—';
+                if (item.timestamp) {
+                    dateDisplay = new Date(item.timestamp).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+                } else if (item.dateStr) {
+                    dateDisplay = item.dateStr;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 ${rowClass} transition-colors">
+                        <td class="p-4 py-3 whitespace-nowrap text-slate-500">${dateDisplay}</td>
+                        <td class="p-4 py-3 font-medium text-slate-900">${escapeHtml(item.jobNumber || '')}</td>
+                        <td class="p-4 py-3 text-center ${q1 <= 3 && q1 > 0 ? 'text-red-500 font-bold' : ''}">${q1 || '-'}</td>
+                        <td class="p-4 py-3 text-center ${q2 <= 3 && q2 > 0 ? 'text-red-500 font-bold' : ''}">${q2 || '-'}</td>
+                        <td class="p-4 py-3 text-center ${q3 <= 3 && q3 > 0 ? 'text-red-500 font-bold' : ''}">${q3 || '-'}</td>
+                        <td class="p-4 py-3 text-center font-semibold ${isLow ? 'text-red-600' : 'text-slate-700'}">${itemTotal.toFixed(1)}</td>
+                        <td class="p-4 py-3 text-slate-500 max-w-xs truncate" title="${escapeHtml(item.comments || '')}">${escapeHtml(item.comments || '') || '-'}</td>
+                    </tr>
+                `;
+            });
+
+            updateMetrics(sorted);
+        }
+
+        function updateMetrics(data) {
+            const count = data.length;
+            document.getElementById('totalCount').innerText = `${count} รายการ`;
+
+            if (count === 0) {
+                ['avgQ1','avgQ2','avgQ3','avgTotal'].forEach(id => document.getElementById(id).innerText = '—');
+                document.getElementById('avgTotal').className = 'text-3xl font-bold mt-1 text-slate-400';
+                return;
+            }
+
+            let sums = { q1: 0, q2: 0, q3: 0, total: 0 };
+            data.forEach(item => {
+                const q1 = Number(item.q1) || 0, q2 = Number(item.q2) || 0, q3 = Number(item.q3) || 0, q4 = Number(item.q4) || 0;
+                sums.q1 += q1; sums.q2 += q2; sums.q3 += q3;
+                sums.total += (q1 + q2 + q3 + q4) / 4;
+            });
+
+            document.getElementById('avgQ1').innerText = (sums.q1 / count).toFixed(1);
+            document.getElementById('avgQ2').innerText = (sums.q2 / count).toFixed(1);
+            document.getElementById('avgQ3').innerText = (sums.q3 / count).toFixed(1);
+            const avg = sums.total / count;
+            const avgEl = document.getElementById('avgTotal');
+            avgEl.innerText = avg.toFixed(1);
+            avgEl.className = `text-3xl font-bold mt-1 ${avg < 4.5 ? 'text-red-600' : 'text-blue-600'}`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        // ==========================================
+        // Modals
+        // ==========================================
+        function showSuccessModal() {
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('successModalContent');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        document.getElementById('closeModalBtn').addEventListener('click', () => {
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('successModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        });
+
+        function resetForm() {
+            jobNumberInput.value = '';
+            commentsInput.value = '';
+            surveyState = { q1: 0, q2: 0, q3: 0, q4: 0 };
+            renderQuestions();
+            validateForm();
+        }
+
+        // ==========================================
+        // Init
+        // ==========================================
+        renderQuestions();
+    </script>
+</body>
+</html>
